@@ -1,5 +1,4 @@
 import streamlit as st
-import html
 
 def transform_elec(b4: str) -> str:
     b10 = "FF1122331C234F0000-CCDDEE00"
@@ -13,68 +12,37 @@ def transform_gas(b4: str) -> str:
     cleaned_b4 = b4[-9:].replace("-", "")
     return first_part + cleaned_b4 + second_part
 
-st.markdown("""
-    <style>
-    html, body, [class*="css"] {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-                     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-        font-size: 16px;
-    }
-    </style>
-""", unsafe_allow_html=True)
+def detect_guid_type(guid: str) -> str:
+    guid = guid.strip()
+    if len(guid) != 23:
+        return "invalid"
+    if guid.startswith("1C-23-4F"):
+        return "elec"
+    elif guid.startswith("44-11-02"):
+        return "gas"
+    return "invalid"
 
 # App title
 st.title("EDMI Install Code Generator")
 
-# Two columns: Elec and Gas
-col1, col2 = st.columns(2)
+st.write("Paste a GUID below – the app will detect if it’s Electric or Gas and create the install code for you.")
 
-# --- Column 1: Electric ---
-with col1:
-    st.subheader("Electric")
-    b4_input_elec = st.text_input("Enter Elec GUID", key="elec")
+guid_input = st.text_input("GUID")
 
-    if st.button("Create Electric Install Code"):
-        result_elec = transform_elec(b4_input_elec)
-        escaped_result_elec = html.escape(result_elec)
+if st.button("Generate Code"):
+    guid_type = detect_guid_type(guid_input)
 
-        st.markdown(f"""
-        <div style="
-            background-color: #f8f9fa;
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            font-family: inherit;
-            font-size: 18px;
-            color: #333;
-            word-break: break-word;
-            margin-top: 20px;
-        ">
-            {escaped_result_elec}
-        </div>
-        """, unsafe_allow_html=True)
+    if guid_type == "invalid":
+        st.error("Please check your GUID. It should be formatted like XX-XX-XX-XX-XX-XX-XX-XX and start with either '1C-23-4F' (Elec) or '44-11-02' (Gas).")
+    else:
+        if guid_type == "elec":
+            result = transform_elec(guid_input)
+            label = "Electric install code"
+        else:
+            result = transform_gas(guid_input)
+            label = "Gas install code"
 
-# --- Column 2: Gas ---
-with col2:
-    st.subheader("Gas")
-    b4_input_gas = st.text_input("Enter Gas GUID", key="gas")
+        st.write(f"Here’s your **{label}**:")
+        st.code(result, language="text")
 
-    if st.button("Create Gas Install Code"):
-        result_gas = transform_gas(b4_input_gas)
-        escaped_result_gas = html.escape(result_gas)
 
-        st.markdown(f"""
-        <div style="
-            background-color: #f8f9fa;
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            font-family: inherit;
-            font-size: 18px;
-            color: #333;
-            word-break: break-word;
-            margin-top: 20px;
-        ">
-            {escaped_result_gas}
-        </div>
-        """, unsafe_allow_html=True)
