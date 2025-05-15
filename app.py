@@ -13,7 +13,6 @@ def transform_gas(b4: str) -> str:
     cleaned_b4 = b4[-9:].replace("-", "")
     return first_part + cleaned_b4 + second_part
 
-# Apply consistent modern font
 st.markdown("""
     <style>
     html, body, [class*="css"] {
